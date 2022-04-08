@@ -1,0 +1,27 @@
+{
+  "name": "httpclientrc",
+  "version": "0.0.1",
+  "description": "simple await http client",
+  "main": "index.js",
+  "scripts": {
+    "test": "node test.js"
+  },
+  "repository": {
+    "type": "git",
+    "url": "https://github.com/Soldy/temprc.git"
+  },
+  "keywords": [],
+  "author": "Soldy <npmjs@gidigi.com> (http://gidigi.com)",
+  "license": "GPL-3.0-or-later",
+  "bugs": {
+    "url": "https://github.com/Soldy/httpclientrc/issues"
+  },
+  "homepage": "https://github.com/Soldy/httpclientrc#readme",
+  "devDependencies": {
+    "nanoTest": "^0.9.9-beta28"
+  },
+  "dependencies": {
+    "clonerc": "0.0.5",
+    "setuprc": "0.9.9-beta20"
+  }
+}
