@@ -3,21 +3,25 @@
  */
 'use strict';
 const https = require('https');
+const http = require('http');
 const $setuprc = (require('setuprc')).base;
 const $clonerc = new (require('clonerc')).base();
 
-const clientBase = async function(options){
-    const _setup_json = {
-        'hostname':{
+const clientBase = function(options){
+    this.request = async function(options){
+        _setup.reset();
+        _setup.setup(options);
+        if(_setup.get('protocol') === 'http')
+            return await _http();
+        return await _https();
+    };
+    const _setup = new $setuprc({
+        'host':{
             'type'    : 'string',
             'default' : '127.0.0.1'
         },
         'path':{
             'type'    : 'string',
-        'address':{
-            'type'    : 'string',
-            'default' : ''
-        },
             'default' : '/'
         },
         'protocol':{
@@ -46,40 +50,79 @@ const clientBase = async function(options){
             ],
             'default' : 'GET'
         }
-    };
+    });
     const _header = function(headers){
         let out = {};
         for(let i in options.headers){
-            out[i]= $clonerc.clone(
-                headers[i]
-            );
-
+            if(typeof headers[i] !== 'undefined')
+                out[i]= $clonerc.clone(
+                    headers[i]
+                );
         }
         return out;
 
     }
-    const _request = async function(options){
+    const _options = function(){
+        return {
+            method : _setup.get('method'),
+            host   : _setup.get('host'),
+            path   : _setup.get('path'),
+            port   : _setup.get('port')
+        };
+    }
+    const _https = async function(){
         const data = await (new Promise(function(resolve, reject) {
-            http.request(options, (resp) => {
+            let req = https.request(_options(), (resp) => {
                 let data = '';
-                resp.on('data', (chunk) => {
+                resp.on('data', function(chunk){
                     data += chunk;
                 });
-                resp.on('end', () => {
+                resp.on('end', function(){
                     resolve({
-                        headers:res.headers
-                        status_code:res.statusCode,
+                        headers:resp.headers,
+                        status_code:resp.statusCode,
                         response:data
                     });
                 });
+                resp.on("error", (err) => {
+                    reject(err);
+                });
             }).on("error", (err) => {
+                console.log(err);
                 reject(err);
             });
+            req.end();
         }));
-        //const data = await query();
+        return data;
+    }
+    const _http = async function(){
+        const data = await (new Promise(function(resolve, reject) {
+            console.log(_options());
+            let req = http.request(_options(), function(resp){
+                let data = '';
+                resp.on('data', function(chunk){
+                    data += chunk;
+                });
+                resp.on('end', function(){
+                    resolve({
+                        headers:resp.headers,
+                        status_code:resp.statusCode,
+                        response:data
+                    });
+                });
+                resp.on("error", (err) => {
+                    reject(err);
+                });
+            }).on("error", (err) => {
+                console.log(err);
+                reject(err);
+            });
+            req.end();
+        }));
         return data;
     }
 }
 
 
-const client = clientBase();
+exports.base = clientBase;
+
