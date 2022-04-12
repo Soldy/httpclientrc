@@ -1,13 +1,20 @@
 /*
- *  @Soldy\temprc\2022.03.07\GPL3
+ *  @Soldy\httpclientrc\2022.03.07\GPL3
  */
 'use strict';
 const https = require('https');
 const http = require('http');
 const $setuprc = (require('setuprc')).base;
 const $clonerc = new (require('clonerc')).base();
-
+/*
+ * @prototype
+ */
 const clientBase = function(options){
+    /*
+     *  @param {object}
+     *  @public
+     *  @return {object}
+     */
     this.request = async function(options){
         _setup.reset();
         _setup.setup(options);
@@ -15,6 +22,10 @@ const clientBase = function(options){
             return await _request('http');
         return await _request('https');
     };
+    /*
+     *  @private
+     *  @var {object}
+     */
     const _setup = new $setuprc({
         'host':{
             'type'    : 'string',
@@ -51,6 +62,11 @@ const clientBase = function(options){
             'default' : 'GET'
         }
     });
+    /*
+     *  @param {object}
+     *  @private
+     *  @return {object}
+     */
     const _header = function(headers){
         let out = {};
         for(let i in options.headers){
@@ -60,8 +76,11 @@ const clientBase = function(options){
                 );
         }
         return out;
-
     }
+    /*
+     *  @private
+     *  @return {object}
+     */
     const _options = function(){
         return {
             method : _setup.get('method'),
@@ -70,7 +89,15 @@ const clientBase = function(options){
             port   : _setup.get('port')
         };
     }
+    /*
+     * @private
+     */
     const _protocols = {http,https}
+    /*
+     *  @param {string}
+     *  @private
+     *  @return {object}
+     */
     const _request = async function(protocol){
         const data = await (new Promise(function(resolve, reject) {
             let req = _protocols[protocol].request(_options(), function(resp){
