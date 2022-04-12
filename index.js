@@ -12,8 +12,8 @@ const clientBase = function(options){
         _setup.reset();
         _setup.setup(options);
         if(_setup.get('protocol') === 'http')
-            return await _http();
-        return await _https();
+            return await _request('http');
+        return await _request('https');
     };
     const _setup = new $setuprc({
         'host':{
@@ -70,9 +70,10 @@ const clientBase = function(options){
             port   : _setup.get('port')
         };
     }
-    const _https = async function(){
+    const _protocols = {http,https}
+    const _request = async function(protocol){
         const data = await (new Promise(function(resolve, reject) {
-            let req = https.request(_options(), (resp) => {
+            let req = _protocols[protocol].request(_options(), function(resp){
                 let data = '';
                 resp.on('data', function(chunk){
                     data += chunk;
@@ -94,33 +95,7 @@ const clientBase = function(options){
             req.end();
         }));
         return data;
-    }
-    const _http = async function(){
-        const data = await (new Promise(function(resolve, reject) {
-            console.log(_options());
-            let req = http.request(_options(), function(resp){
-                let data = '';
-                resp.on('data', function(chunk){
-                    data += chunk;
-                });
-                resp.on('end', function(){
-                    resolve({
-                        headers:resp.headers,
-                        status_code:resp.statusCode,
-                        response:data
-                    });
-                });
-                resp.on("error", (err) => {
-                    reject(err);
-                });
-            }).on("error", (err) => {
-                console.log(err);
-                reject(err);
-            });
-            req.end();
-        }));
-        return data;
-    }
+    };
 }
 
 
